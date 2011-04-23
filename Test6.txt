@@ -1,0 +1,24 @@
+<a name="indexOf(java.lang.String, int)"><!-- --></a><h3>
+
+indexOf</h3>
+<pre>public int <b>indexOf</b>(<a href="../../java/lang/String.html" title="class in java.lang">String</a>&nbsp;str,
+                   int&nbsp;fromIndex)</pre>
+<dl>
+<dd>Returns the index within this string of the first occurrence of the
+ specified substring, starting at the specified index.  The integer
+ returned is the smallest value <tt>k</tt> for which:
+ <blockquote><pre>     k &gt;= Math.min(fromIndex, this.length()) &amp;&amp; this.startsWith(str, k)
+ </pre></blockquote>
+
+ If no such value of <i>k</i> exists, then -1 is returned.
+<p>
+</p></dd><dd><dl>
+</dl>
+</dd>
+<dd><dl>
+<dt><b>Parameters:</b></dt><dd><code>str</code> - the substring for which to search.</dd><dd><code>fromIndex</code> - the index from which to start the search.
+
+</dd><dt><b>Returns:</b></dt><dd>the index within this string of the first occurrence of the
+          specified substring, starting at the specified index.</dd></dl>
+</dd>
+</dl>

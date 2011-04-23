@@ -1,0 +1,19 @@
+<a name="valueOf(long)"><!-- --></a><h3>
+valueOf</h3>
+<pre>public static <a href="../../java/lang/String.html" title="class in java.lang">String</a> <b>valueOf</b>(long&nbsp;l)</pre>
+<dl>
+<dd>Returns the string representation of the <code>long</code> argument.
+ <p>
+
+ The representation is exactly the one returned by the
+ <code>Long.toString</code> method of one argument.
+</p><p>
+</p></dd><dd><dl>
+</dl>
+</dd>
+<dd><dl>
+<dt><b>Parameters:</b></dt><dd><code>l</code> - a <code>long</code>.
+</dd><dt><b>Returns:</b></dt><dd>a string representation of the <code>long</code> argument.</dd><dt><b>See Also:</b></dt><dd><a href="../../java/lang/Long.html#toString%28long%29"><code>Long.toString(long)</code></a></dd></dl>
+
+</dd>
+</dl>
