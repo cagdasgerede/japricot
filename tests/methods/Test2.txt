@@ -1,0 +1,18 @@
+<a name="valueOf(java.lang.Object)"><!-- --></a><h3>
+valueOf</h3>
+<pre>public static <a href="../../java/lang/String.html" title="class in java.lang">String</a> <b>valueOf</b>(<a href="../../java/lang/Object.html" title="class in java.lang">Object</a>&nbsp;obj)</pre>
+
+<dl>
+<dd>Returns the string representation of the <code>Object</code> argument.
+<p>
+</p></dd><dd><dl>
+</dl>
+</dd>
+<dd><dl>
+<dt><b>Parameters:</b></dt><dd><code>obj</code> - an <code>Object</code>.
+</dd><dt><b>Returns:</b></dt><dd>if the argument is <code>null</code>, then a string equal to
+          <code>"null"</code>; otherwise, the value of
+          <code>obj.toString()</code> is returned.</dd><dt><b>See Also:</b></dt><dd><a href="../../java/lang/Object.html#toString%28%29"><code>Object.toString()</code></a></dd></dl>
+
+</dd>
+</dl>

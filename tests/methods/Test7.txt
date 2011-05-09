@@ -1,0 +1,19 @@
+<a name="isEmpty()"><!-- --></a><h3>
+isEmpty</h3>
+<pre>public boolean <b>isEmpty</b>()</pre>
+<dl>
+<dd>Returns <tt>true</tt> if, and only if, <a href="../../java/lang/String.html#length%28%29"><code>length()</code></a> is <tt>0</tt>.
+
+<p>
+</p></dd><dd><dl>
+</dl>
+</dd>
+<dd><dl>
+
+<dt><b>Returns:</b></dt><dd><tt>true</tt> if <a href="../../java/lang/String.html#length%28%29"><code>length()</code></a> is <tt>0</tt>, otherwise
+ <tt>false</tt></dd><dt><b>Since:</b></dt>
+
+  <dd>1.6</dd>
+</dl>
+</dd>
+</dl>

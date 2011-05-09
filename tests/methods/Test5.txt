@@ -1,0 +1,35 @@
+<a name="intern()"><!-- --></a><h3>
+intern</h3>
+<pre>public <a href="../../java/lang/String.html" title="class in java.lang">String</a> <b>intern</b>()</pre>
+<dl>
+<dd>Returns a canonical representation for the string object.
+ <p>
+ A pool of strings, initially empty, is maintained privately by the
+ class <code>String</code>.
+ </p><p>
+
+ When the intern method is invoked, if the pool already contains a
+ string equal to this <code>String</code> object as determined by
+ the <a href="../../java/lang/String.html#equals%28java.lang.Object%29"><code>equals(Object)</code></a> method, then the string from the pool is
+ returned. Otherwise, this <code>String</code> object is added to the
+ pool and a reference to this <code>String</code> object is returned.
+ </p><p>
+ It follows that for any two strings <code>s</code> and <code>t</code>,
+ <code>s.intern()&nbsp;==&nbsp;t.intern()</code> is <code>true</code>
+
+ if and only if <code>s.equals(t)</code> is <code>true</code>.
+ </p><p>
+ All literal strings and string-valued constant expressions are
+ interned. String literals are defined in §3.10.5 of the
+ <a href="http://java.sun.com/docs/books/jls/html/">Java Language
+ Specification</a>
+</p><p>
+</p></dd><dd><dl>
+</dl>
+</dd>
+<dd><dl>
+
+<dt><b>Returns:</b></dt><dd>a string that has the same contents as this string, but is
+          guaranteed to be from a pool of unique strings.</dd></dl>
+</dd>
+</dl>

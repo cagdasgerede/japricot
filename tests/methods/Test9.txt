@@ -1,0 +1,19 @@
+<a name="clear()"><!-- --></a><h3>
+clear</h3>
+<pre>public void <b>clear</b>()</pre>
+<dl>
+<dd>Clears the entire graphics area to the current background color.
+ Note that global alpha is not applied in this case.
+ If the background color contains alpha and the target surface contains alpha,
+ the pixels are overwritten with the background color and include alpha; the old
+ target surface content is ignored.
+<p>
+</p></dd><dd><dl>
+</dl>
+
+</dd>
+<dd><dl>
+</dl>
+</dd>
+</dl>
+<hr>

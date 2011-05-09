@@ -1,12 +1,65 @@
+# a method consists of 3 parts
+# 1) signature: method_name(param_name:type...)
+# 2) return_type: void, primite_type, non-primitive_type (Note: non-primitive_type can get complicated
+# due to use of arrays and templates which are currently not fully supported).
+# 3) "type"(?): static or not.
+# 4) access modifier: public, protected, default (not supported).
+#
+# To extract methods of a class:
+# a) call Parser.prepare(file) which returns an Hpricot object;
+# b) call Parser.parse_class with Hpricot object returned above. This returns an array
+# of methods.
+#
+# A)
+# require './parser.rb'
+# doc = Parser.prepare(tests/classes/HTML.html)
+# res = Parser.parse_class(doc)
+# res.each_with_index do |h,i| puts "#{i}:#{h[:returns]}"
+#
+# The code produce the following:
+# 0:javax.swing.text.html.HTML.Tag[]
+# 1:javax.swing.text.html.HTML.Tag
+# 2:int
+# 3:javax.swing.text.html.HTML.Attribute[]
+# 4:void
+# 5:javax.swing.text.html.HTML.Attribute
+#
+#
+# B)
+# res[1] produces:
+#
+# {:name=>"getIntegerAttributeValue",
+# :params=>["javax.swing.text.AttributeSet", "javax.swing.text.html.HTML.Attribute", "int"],
+# :returns=>"int",
+# :type=>"static"}
+#
+#
+# c)
+# res.each_with_index do |h,i| puts "#{i}:#{h[:returns]}"
+#
+# This produces:
+#
+# 0:[]
+# 1:["java.lang.String"]
+# 2:["javax.swing.text.AttributeSet", "javax.swing.text.html.HTML.Attribute", "int"]
+# 3:[]
+# 4:["byte[]"]
+# 5:["java.lang.String"].
+
+require 'rubygems'
+require 'hpricot'
+
 class Parser
+  #invoke this to prepare the file to be parsed.
 	def self.prepare file, params={:fixup_tags=>true}
 		doc = File.open(file, "rb") do |file| file.read end
-                doc.gsub!( '&nbsp;', ' ' )	
+		doc.gsub!( '&nbsp;', ' ' )
 		doc.gsub!( '<p>', '') #problematic <p>'s
 		doc.gsub!( '</p>', '') #problematic </p>'s
-                Hpricot( doc, params )
+		Hpricot( doc, params )
 	end
 
+  #invoke this to parse a single class to get methods in the class.
 	def self.parse_class doc
 		methods = []
 		anchor = doc.at('//a[@name=method_detail]')
@@ -27,14 +80,8 @@ class Parser
 		methods
 	end
 
-        def self.parse_single doc, method
-                doc.search('//a[@name]') { |e| 
-			_parse_method e, method
-		}
-        end
-
 	def self._parse_method element, method
-		get_method_name_and_params( element['name'], method ) 
+		extract_method_name_and_params( element['name'], method )
 		pre_node = element.following_siblings[ 1 ]
 
 		#template use in parameters
@@ -44,18 +91,29 @@ class Parser
 			\nmethod:#{method[:name]}\ncontent:#{tmp}" 
 		end
 
-		get_return_type( pre_node, method )
-		get_method_type( pre_node, method )
+		extract_return_type( pre_node, method )
+		extract_method_type( pre_node, method )
 	end
 
-        def self.get_method_name_and_params( text, method )
-                #"format(java.util.Locale, java.lang.String, java.lang.Object...)"
-                tmp = text.gsub(/\(/,',').gsub(/\)/,"").gsub(/ /,'').split(/,/)
-                method[:name] = tmp.shift
-                method[:params] = tmp
-        end
+	#auxilary method created during test creation
+	def self.parse_single doc, method
+		doc.search('//a[@name]') { |e|
+			_parse_method e, method
+		}
+  end
 
-	def self.get_return_type pre_node, method
+  private
+
+  #extract signature
+  def self.extract_method_name_and_params( text, method )
+    #"format(java.util.Locale, java.lang.String, java.lang.Object...)"
+    tmp = text.gsub(/\(/,',').gsub(/\)/,"").gsub(/ /,'').split(/,/)
+    method[:name] = tmp.shift
+    method[:params] = tmp
+  end
+
+	#extracts return type (e.g., void, int, LinkedList, String[]).
+	def self.extract_return_type pre_node, method
 		pre_node_siblings = pre_node.at('b').preceding_siblings
 		tmp = pre_node_siblings.first
 
@@ -87,8 +145,9 @@ class Parser
 		end
 	end
 
-	def self.get_method_type pre_node, method
-		tmp2 = pre_node.inner_html.split(' ')
+	#method type can be static or none.
+	def self.extract_method_type pre_node, method
+		tmp2 = pre_node.inner_html.split(' ')    
 		method[:type]='static' if tmp2[0] == 'static' or (tmp2[0] == 'public' and tmp2[1] == 'static')
 	end
 end
