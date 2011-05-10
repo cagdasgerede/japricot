@@ -6,20 +6,20 @@ require './tests/test_helper'
 
 class TestParserMethods < Test::Unit::TestCase
 
-  METHOD_TEST_FOLDER = File.join('tests','methods')
-  
-  def _test config
+METHOD_TEST_FOLDER = File.join('tests','methods')
+	
+	def _test config
 		doc = Parser.prepare config[:file]
 		method = {}
 		Parser.parse_single doc, method
 		_assert config, method
-  end
+	end
 
-  def _folder_helper file
-	File.join(METHOD_TEST_FOLDER, file)
-  end
-  
-  def test_Test1
+	def _folder_helper file
+		File.join(METHOD_TEST_FOLDER, file)
+	end
+
+	def test_Test1
 		config = {:file => _folder_helper('Test1.txt'),
 			:method => 'format',
 			:params => ["java.util.Locale", "java.lang.String", "java.lang.Object..."],

@@ -6,9 +6,9 @@ require './tests/test_helper'
 
 class TestParserClasses < Test::Unit::TestCase
 
-  CLASS_TEST_FOLDER = File.join( 'tests', 'classes' )
+	CLASS_TEST_FOLDER = File.join( 'tests', 'classes' )
 
-  def _test_class config
+	def _test_class config
 		doc = Parser.prepare config[:file]
 		methods = Parser.parse_class( doc )
 		assert_equal( config[:methods].size, methods.size, "Number of methods do not match" )
@@ -21,7 +21,7 @@ class TestParserClasses < Test::Unit::TestCase
 	def _folder_helper file
 		File.join( CLASS_TEST_FOLDER, file )
 	end
-  
+	
 	def test_ZipFile
 		config = {:file => _folder_helper('ZipFile.html'),
 			:methods=>[
