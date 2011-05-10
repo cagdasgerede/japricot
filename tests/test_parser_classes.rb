@@ -6,7 +6,7 @@ require './tests/test_helper'
 
 class TestParserClasses < Test::Unit::TestCase
 
-  CLASS_TEST_FOLDER = 'tests/classes'
+  CLASS_TEST_FOLDER = File.join( 'tests', 'classes' )
 
   def _test_class config
 		doc = Parser.prepare config[:file]
@@ -17,9 +17,13 @@ class TestParserClasses < Test::Unit::TestCase
 			_assert expected, e
 		end
 	end
+	
+	def _folder_helper file
+		File.join( CLASS_TEST_FOLDER, file )
+	end
   
 	def test_ZipFile
-		config = {:file => "#{CLASS_TEST_FOLDER}/ZipFile.html",
+		config = {:file => _folder_helper('ZipFile.html'),
 			:methods=>[
 				{:method=> 'getEntry',
 				:params=> ['java.lang.String'],
@@ -66,7 +70,7 @@ class TestParserClasses < Test::Unit::TestCase
 	end
 
 	def test_HTML
-		config = {:file => "#{CLASS_TEST_FOLDER}/HTML.html",
+		config = {:file => _folder_helper('HTML.html'),
 			:methods=>[
 				{:method=> 'getAllTags',
 				:params=> [],
@@ -103,7 +107,7 @@ class TestParserClasses < Test::Unit::TestCase
 	end
 
 	def test_BitVector
-		config = {:file => "#{CLASS_TEST_FOLDER}/BitVector.html",
+		config = {:file => _folder_helper('BitVector.html'),
 			:methods=>[
 				{:method=> 'at',
 				:params=> ['int'],
@@ -155,14 +159,14 @@ class TestParserClasses < Test::Unit::TestCase
 	end
 
 	def test_BarcodeDecoder
-		config = {:file => "#{CLASS_TEST_FOLDER}/BarcodeDecoder.html",
+		config = {:file => _folder_helper('BarcodeDecoder.html'),
 			:methods=>[
 			]}
 		_test_class config
 	end
 
 	def test_AlertListener
-		config = {:file => "#{CLASS_TEST_FOLDER}/AlertListener.html",
+		config = {:file => _folder_helper('AlertListener.html'),
 			:methods=>[
 				{:method=> 'audioDone',
 				:params=> ['int'],
@@ -184,7 +188,7 @@ class TestParserClasses < Test::Unit::TestCase
 	end
 
 	def test_AccelerometerSensor
-		config = {:file => "#{CLASS_TEST_FOLDER}/AccelerometerSensor.html",
+		config = {:file => _folder_helper('AccelerometerSensor.html'),
 			:methods=>[
 				{:method=> 'isSupported',
 				:params=> [],
@@ -212,7 +216,7 @@ class TestParserClasses < Test::Unit::TestCase
 	end
 
 	def test_AbstractView
-		config = {:file => "#{CLASS_TEST_FOLDER}/AbstractView.html",
+		config = {:file => _folder_helper('AbstractView.html'),
 			:methods=>[
 				{:method=> 'getDocument',
 				:params=> [],

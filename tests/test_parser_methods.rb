@@ -6,7 +6,7 @@ require './tests/test_helper'
 
 class TestParserMethods < Test::Unit::TestCase
 
-  METHOD_TEST_FOLDER = 'tests/methods'
+  METHOD_TEST_FOLDER = File.join('tests','methods')
   
   def _test config
 		doc = Parser.prepare config[:file]
@@ -15,8 +15,12 @@ class TestParserMethods < Test::Unit::TestCase
 		_assert config, method
   end
 
+  def _folder_helper file
+	File.join(METHOD_TEST_FOLDER, file)
+  end
+  
   def test_Test1
-		config = {:file => "#{METHOD_TEST_FOLDER}/Test1.txt",
+		config = {:file => _folder_helper('Test1.txt'),
 			:method => 'format',
 			:params => ["java.util.Locale", "java.lang.String", "java.lang.Object..."],
 			:returns => "java.lang.String",
@@ -25,7 +29,7 @@ class TestParserMethods < Test::Unit::TestCase
 	end
 
 	def test_Test2
-		config = {:file => "#{METHOD_TEST_FOLDER}/Test2.txt",
+		config = {:file => _folder_helper('Test2.txt'),
 			:method => 'valueOf',
 			:params => ["java.lang.Object"],
 			:returns => 'java.lang.String',
@@ -34,7 +38,7 @@ class TestParserMethods < Test::Unit::TestCase
 	end
 
 	def test_Test3
-		config = {:file => "#{METHOD_TEST_FOLDER}/Test3.txt",
+		config = {:file => _folder_helper('Test3.txt'),
 			:method => 'valueOf',
 			:params => ["char[]"],
 			:returns => 'java.lang.String',
@@ -43,7 +47,7 @@ class TestParserMethods < Test::Unit::TestCase
 	end
 
 	def test_Test4
-		config = {:file => "#{METHOD_TEST_FOLDER}/Test4.txt",
+		config = {:file => _folder_helper('Test4.txt'),
 			:method => 'valueOf',
 			:params => ["long"],
 			:returns => 'java.lang.String',
@@ -52,7 +56,7 @@ class TestParserMethods < Test::Unit::TestCase
 	end
 
 	def test_Test5
-		config = {:file => "#{METHOD_TEST_FOLDER}/Test5.txt",
+		config = {:file => _folder_helper('Test5.txt'),
 			:method => 'intern',
 			:params => [],
 			:returns => 'java.lang.String' }
@@ -60,7 +64,7 @@ class TestParserMethods < Test::Unit::TestCase
 	end
 
 	def test_Test6
-		config = {:file => "#{METHOD_TEST_FOLDER}/Test6.txt",
+		config = {:file => _folder_helper('Test6.txt'),
 			:method => 'indexOf',
 			:params => ["java.lang.String", "int"],
 			:returns => 'int'}
@@ -68,7 +72,7 @@ class TestParserMethods < Test::Unit::TestCase
 	end
 
 	def test_Test7
-		config = {:file => "#{METHOD_TEST_FOLDER}/Test7.txt",
+		config = {:file => _folder_helper('Test7.txt'),
 			:method => 'isEmpty',
 			:params => [],
 			:returns => 'boolean' }
@@ -76,7 +80,7 @@ class TestParserMethods < Test::Unit::TestCase
 	end
 
 	def test_Test8
-		config = {:file => "#{METHOD_TEST_FOLDER}/Test8.txt",
+		config = {:file => _folder_helper('Test8.txt'),
 			:method => 'create',
 			:params => ["net.rim.device.api.system.Bitmap"],
 			:returns => 'net.rim.device.api.ui.Graphics',
@@ -85,7 +89,7 @@ class TestParserMethods < Test::Unit::TestCase
 	end
 
 	def test_Test9
-		config = {:file => "#{METHOD_TEST_FOLDER}/Test9.txt",
+		config = {:file => _folder_helper('Test9.txt'),
 			:method => 'clear',
 			:params => [],
 			:returns => 'void' }

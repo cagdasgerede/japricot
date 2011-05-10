@@ -23,8 +23,8 @@ class FolderParser
   end
 
   def self.parse_files paths=[
-				#File.join('tests','classes','HTML.html'), 
-				#File.join('tests','classes','BitVector.html'),
+				File.join('tests','classes','HTML.html'), 
+				File.join('tests','classes','BitVector.html'),
 				File.join('tests','classes','ZipFile.html') 
 				]
     result = {}
@@ -45,8 +45,7 @@ class FolderParser
     expected_class = path.split( File::SEPARATOR ).last.split('.').first
     doc = Parser.prepare path
     res = doc.search("//meta[@content ~= 'class']")#<meta name="keywords" content="javax.swing.text.html.HTML class">
-    
-    unless res.nil?      
+    unless res.nil? or res.first.nil?      
       pkg_and_class = res.first[:content].split[0] #javax.swing.text.html.HTML
       tmp = pkg_and_class.split( '.' )
       klass = tmp.pop
