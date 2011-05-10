@@ -5,7 +5,7 @@ require './parser'
 
 class FolderParser
 
-  def self.parse_folder folder='tests\classes'
+  def self.parse_folder folder = File.join('tests', 'classes')
     entries = Dir.new( folder ).entries
     html_files = entries.select do |e|
       e.match( /^\./ ).nil? and 
@@ -14,7 +14,7 @@ class FolderParser
     end
     
     html_files.map! do |f|
-      "#{folder}\\#{f}"      
+      File.join( folder, f )      
     end
     pp html_files
     #pp parse_files html_files
@@ -22,7 +22,11 @@ class FolderParser
     #pp parse_files [ "tests\\classes\\AlertListener.html"]    
   end
 
-  def self.parse_files paths= [ 'tests\classes\HTML.html', 'tests\classes\BitVector.html', 'tests\classes\ZipFile.html' ]
+  def self.parse_files paths=[
+				#File.join('tests','classes','HTML.html'), 
+				#File.join('tests','classes','BitVector.html'),
+				File.join('tests','classes','ZipFile.html') 
+				]
     result = {}
     paths.each do |path|
       extracted = parse_file( path )
@@ -36,9 +40,9 @@ class FolderParser
     result
   end
   
-  def self.parse_file path= 'tests\classes\HTML.html'
+  def self.parse_file path = File.join('tests','classes','HTML.html')
 
-    expected_class = path.split('\\').last.split('.').first
+    expected_class = path.split( File::SEPARATOR ).last.split('.').first
     doc = Parser.prepare path
     res = doc.search("//meta[@content ~= 'class']")#<meta name="keywords" content="javax.swing.text.html.HTML class">
     
@@ -51,7 +55,7 @@ class FolderParser
       if expected_class != klass
         msg = "Expected class name #{expected_class} do not match with the class name #{klass} in the file #{path}"
         $logger.fatal( msg )
-        raise Exception.new msg
+        raise Exception.new( msg )
       end
       methods = Parser.parse_class( Parser.prepare( path ) )
       return { pkg_and_class => {:class => klass, :package => pkg, :origin => path, :methods => methods} }
