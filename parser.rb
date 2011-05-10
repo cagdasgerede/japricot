@@ -50,7 +50,7 @@ require 'rubygems'
 require 'hpricot'
 
 class Parser
-  #invoke this to prepare the file to be parsed.
+	#invoke this to prepare the file to be parsed.
 	def self.prepare file, params={:fixup_tags=>true}
 		doc = File.open(file, "rb") do |file| file.read end
 		doc.gsub!( '&nbsp;', ' ' )
@@ -59,7 +59,7 @@ class Parser
 		Hpricot( doc, params )
 	end
 
-  #invoke this to parse a single class to get methods in the class.
+	#invoke this to parse a single class to get methods in the class.
 	def self.parse_class doc
 		methods = []
 		anchor = doc.at('//a[@name=method_detail]')
@@ -100,17 +100,17 @@ class Parser
 		doc.search('//a[@name]') { |e|
 			_parse_method e, method
 		}
-  end
+	end
 
-  private
+	private
 
-  #extract signature
-  def self.extract_method_name_and_params( text, method )
-    #"format(java.util.Locale, java.lang.String, java.lang.Object...)"
-    tmp = text.gsub(/\(/,',').gsub(/\)/,"").gsub(/ /,'').split(/,/)
-    method[:name] = tmp.shift
-    method[:params] = tmp
-  end
+	#extract signature
+	def self.extract_method_name_and_params( text, method )
+		#"format(java.util.Locale, java.lang.String, java.lang.Object...)"
+		tmp = text.gsub(/\(/,',').gsub(/\)/,"").gsub(/ /,'').split(/,/)
+		method[:name] = tmp.shift
+		method[:params] = tmp
+	end
 
 	#extracts return type (e.g., void, int, LinkedList, String[]).
 	def self.extract_return_type pre_node, method
