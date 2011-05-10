@@ -87,7 +87,7 @@ class Parser
 		#template use in parameters
 		tmp = pre_node.inner_html
 		unless tmp.match('extends').nil? and tmp.match('super').nil?
-			puts "WARNING: Use of templates in parameters not supported yet.
+			$logger.warn "Use of templates in parameters not supported yet.
 			\nmethod:#{method[:name]}\ncontent:#{tmp}" 
 		end
 
@@ -118,7 +118,7 @@ class Parser
 		tmp = pre_node_siblings.first
 
 		# mainly because we have to deal with [] use. Current detection of [] assumes no template use.
-		puts "WARNING: Template uses in return type not supported yet. \nmethod: #{method[:name]}\ncontent: #{pre_node_siblings}" if pre_node_siblings.size > 1
+		$logger.warn "Template uses in return type not supported yet. \nmethod: #{method[:name]}\ncontent: #{pre_node_siblings}" if pre_node_siblings.size > 1
 
 		unless tmp.nil? #go here when non-primitive type (e.g., public static <a href=...String...)
 			package = tmp['title'].split(/ /).last

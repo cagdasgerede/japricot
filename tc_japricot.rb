@@ -2,8 +2,12 @@ require "test/unit"
 require 'rubygems'
 require 'hpricot'
 require './parser'
+require 'logger'
 
-class TestParsing < Test::Unit::TestCase
-  require './tests/test_methods'
-  require './tests/test_classes'
-end
+$logger = Logger.new(STDOUT)
+#$logger = Logger.new('logfile.log')
+$logger.level = Logger::ERROR
+
+require './tests/test_parser_methods'
+require './tests/test_parser_classes'
+

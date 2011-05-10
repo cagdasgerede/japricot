@@ -4,7 +4,7 @@ require 'hpricot'
 require './parser'
 require './tests/test_helper'
 
-class TestMethods < Test::Unit::TestCase
+class TestParserMethods < Test::Unit::TestCase
 
   METHOD_TEST_FOLDER = 'tests/methods'
   

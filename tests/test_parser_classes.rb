@@ -4,7 +4,7 @@ require 'hpricot'
 require './parser'
 require './tests/test_helper'
 
-class TestClasses < Test::Unit::TestCase
+class TestParserClasses < Test::Unit::TestCase
 
   CLASS_TEST_FOLDER = 'tests/classes'
 
@@ -14,7 +14,6 @@ class TestClasses < Test::Unit::TestCase
 		assert_equal( config[:methods].size, methods.size, "Number of methods do not match" )
 		methods.each_with_index do |e,i|
 			expected = config[:methods][i]
-			#puts "testdef: #{expected[:method]} --- parsed: #{e[:name]}"
 			_assert expected, e
 		end
 	end
