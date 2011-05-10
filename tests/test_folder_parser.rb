@@ -12,7 +12,7 @@ class TestFolderParser < Test::Unit::TestCase
 		end
 	end
 
-	def x_test_parse_file_empty
+	def test_parse_file_empty
 		assert_equal( {}, FolderParser.parse_file(File.join('tests', 'classes', 'UnrelatedFile.html')))
 	end
 	

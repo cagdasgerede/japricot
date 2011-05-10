@@ -6,7 +6,7 @@ require './tests/test_helper'
 
 class TestParserMethods < Test::Unit::TestCase
 
-METHOD_TEST_FOLDER = File.join('tests','methods')
+	METHOD_TEST_FOLDER = File.join('tests','methods')
 	
 	def _test config
 		doc = Parser.prepare config[:file]
