@@ -21,17 +21,19 @@ class TestFolderParser < Test::Unit::TestCase
 	end
 
 	def _helper params
-		key, value = FolderParser.parse_file(File.join('tests','classes',"#{params[:name]}.html")).shift
-		assert_equal( params[:name], value[:class], "Class name mismatch" )
-		assert_equal( params[:package], value[:package], "Package name mismatch" )
-		assert_equal( File.join('tests','classes',"#{params[:name]}.html"), value[:origin], "Origin file mismatch" )
-		assert_equal( params[:method_count], value[:methods].length, "Number of methods mismatch" )
+		pkg_and_name, extracted = FolderParser.parse_file(File.join('tests','classes',"#{params[:name]}.html")).shift
+		assert_equal( params[:name], extracted[:name], "Class name mismatch" )
+		assert_equal( params[:package], extracted[:package], "Package name mismatch" )
+		assert_equal( File.join('tests','classes',"#{params[:name]}.html"), extracted[:origin], "Origin file mismatch" )
+		assert_equal( params[:method_count], extracted[:methods].length, "Number of methods mismatch" )
+		assert_equal( params[:type], extracted[:type], "Unit type mismatch")
 	end
 
 	def test_parse_file_HTML
 		params = { :name => 'HTML',
 		:package => 'javax.swing.text.html',
-		:method_count => 6 }
+		:method_count => 6,
+		:type => :class }
 		
 		_helper params
 	end
@@ -39,7 +41,8 @@ class TestFolderParser < Test::Unit::TestCase
 	def test_parse_file_AccelerometerSensor
 		params = { :name => 'AccelerometerSensor',
 		:package => 'net.rim.device.api.system',
-		:method_count => 4}
+		:method_count => 4,
+		:type => :class }
 		
 		_helper params
 	end
@@ -47,7 +50,8 @@ class TestFolderParser < Test::Unit::TestCase
 	def test_parse_file_BarcodeDecoder
 		params = {:name => 'BarcodeDecoder',
 		:package => 'net.rim.device.api.barcodelib',
-		:method_count => 0}
+		:method_count => 0,
+		:type => :class }
 		
 		_helper params
 	end
@@ -55,7 +59,8 @@ class TestFolderParser < Test::Unit::TestCase
 	def test_parse_file_BitVector
 		params = {:name => 'BitVector',
 		:package => 'com.google.zxing.qrcode.encoder',
-		:method_count => 9}
+		:method_count => 9,
+		:type => :class }
 		
 		_helper params
 	end
@@ -63,23 +68,26 @@ class TestFolderParser < Test::Unit::TestCase
 	def test_parse_file_ZipFile
 		params = {:name => 'ZipFile',
 		:package => 'java.util.zip',
-		:method_count => 8}
+		:method_count => 8,
+		:type => :class }
 		
 		_helper params
 	end
 	
 	def test_parse_file_AbstractView
 		params = {:name => 'AbstractView',
-		:package => '',
-		:method_count => 0}
+		:package => 'org.w3c.dom.views',
+		:method_count => 1,
+		:type => :interface }
 		
 		_helper params
 	end
 	
 	def test_parse_file_AlertListener
 		params = {:name => 'AlertListener',
-		:package => '',
-		:method_count => 0}
+		:package => 'net.rim.device.api.system',
+		:method_count => 3,
+		:type => :interface }
 		
 		_helper params
 	end

@@ -30,9 +30,9 @@ class FolderParser
     result = {}
     paths.each do |path|
       extracted = parse_file( path )
-      pkg_and_class = extracted.keys.first
-      unless result[ pkg_and_class ].nil?
-        $logger.error "The class #{pkg_and_class} already extracted in the file #{result[pkg_and_class][:origin]} is tried to be extracted again in the file #{path}"
+      pkg_and_name = extracted.keys.first
+      unless result[ pkg_and_name ].nil?
+        $logger.error "The class #{pkg_and_name} already extracted in the file #{result[pkg_and_name][:origin]} is tried to be extracted again in the file #{path}"
       else
         result.merge!( extracted )
       end
@@ -42,24 +42,36 @@ class FolderParser
   
   def self.parse_file path = File.join('tests','classes','HTML.html')
 
-    expected_class = path.split( File::SEPARATOR ).last.split('.').first
+    expected_name = path.split( File::SEPARATOR ).last.split('.').first
     doc = Parser.prepare path
-    res = doc.search("//meta[@content ~= 'class']")#<meta name="keywords" content="javax.swing.text.html.HTML class">
-    unless res.nil? or res.first.nil?      
-      pkg_and_class = res.first[:content].split[0] #javax.swing.text.html.HTML
-      tmp = pkg_and_class.split( '.' )
-      klass = tmp.pop
+    res = doc.search("//meta[@content *= ' class']")#<meta name="keywords" content="javax.swing.text.html.HTML class">
+	if res.first.nil?
+		res = doc.search("//meta[@content *= ' interface']")
+		if res.first.nil?
+			type = :unknown
+		else
+			type = :interface
+		end
+	else
+		type = :class
+	end
+
+	if type == :class || type == :interface      
+      pkg_and_name = res.first[:content].split[0] #javax.swing.text.html.HTML
+      tmp = pkg_and_name.split( '.' )
+      name = tmp.pop
       pkg = tmp.join( '.' )
 
-      if expected_class != klass
-        msg = "Expected class name #{expected_class} do not match with the class name #{klass} in the file #{path}"
+      if expected_name != name
+        msg = "Expected class/interface name #{expected_name} do not match with the class/interface name #{name} in the file #{path}"
         $logger.fatal( msg )
         raise Exception.new( msg )
       end
       methods = Parser.parse_class( Parser.prepare( path ) )
-      return { pkg_and_class => {:class => klass, :package => pkg, :origin => path, :methods => methods} }
+      return { pkg_and_name => {:name => name, :package => pkg, :type => type, 
+		:origin => path, :methods => methods } }
     else
-      $logger.warn "This (#{path}) is not a class. Skipping."
+      $logger.warn "This (#{path}) is not a class/interface. Skipping."
       return {}
     end
   end
