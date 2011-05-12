@@ -12,6 +12,7 @@ class TestFolderParser < Test::Unit::TestCase
 		end
 	end
 
+	# this test causes a log message of type FATAL. This is expected.
 	def test_parse_file_empty
 		assert_equal( {}, FolderParser.parse_file(File.join('tests', 'classes', 'UnrelatedFile.html')))
 	end
@@ -90,6 +91,21 @@ class TestFolderParser < Test::Unit::TestCase
 		:type => :interface }
 		
 		_helper params
+	end
+	
+	def test_parse_files
+		res = FolderParser.parse_files [File.join('tests','classes','HTML.html'), File.join('tests','classes','AbstractView.html')]
+		html = res["javax.swing.text.html.HTML"]
+		assert_equal(html[:type], :class)
+		assert_equal(html[:origin], "tests/classes/HTML.html")
+		assert_equal(html[:name], "HTML")
+		assert_equal(html[:package], "javax.swing.text.html")
+		
+		abstract_view = res["org.w3c.dom.views.AbstractView"]
+		assert_equal(abstract_view[:type], :interface)
+		assert_equal(abstract_view[:origin], "tests/classes/AbstractView.html")
+		assert_equal(abstract_view[:name], "AbstractView")
+		assert_equal(abstract_view[:package], "org.w3c.dom.views")
 	end
 end
 

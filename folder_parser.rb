@@ -22,11 +22,9 @@ class FolderParser
     #pp parse_files [ "tests\\classes\\AlertListener.html"]    
   end
 
-  def self.parse_files paths=[
-				File.join('tests','classes','HTML.html'), 
-				File.join('tests','classes','BitVector.html'),
-				File.join('tests','classes','ZipFile.html') 
-				]
+	# accepts an arroy of file paths,
+	# returns a hash of hashes of extracted information
+  def self.parse_files paths#=[File.join('tests','classes','HTML.html'), File.join('tests','classes','BitVector.html'),File.join('tests','classes','ZipFile.html') ]
     result = {}
     paths.each do |path|
       extracted = parse_file( path )
@@ -40,9 +38,16 @@ class FolderParser
     result
   end
   
-  def self.parse_file path = File.join('tests','classes','HTML.html')
-
-    expected_name = path.split( File::SEPARATOR ).last.split('.').first
+  # FolderParser.parse_file(File.join('tests','classes','HTML.html'))
+	# produces a hash as follows:
+  # {"javax.swing.text.html.HTML"=>
+	#		{ :name =>"HTML", :package=>"javax.swing.text.html",
+	#			:type =>:class, :origin=>"tests/classes/HTML.html",
+	#			:methods=> ... } }
+	#	
+	# type can be interface or class. Key of the hash shows the full package path of the file
+	def self.parse_file path#= File.join('tests','classes','HTML.html')
+		expected_name = path.split( File::SEPARATOR ).last.split('.').first
     doc = Parser.prepare path
     res = doc.search("//meta[@content *= ' class']")#<meta name="keywords" content="javax.swing.text.html.HTML class">
 	if res.first.nil?
