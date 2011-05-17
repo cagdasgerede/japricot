@@ -16,10 +16,11 @@ class FolderParser
     html_files.map! do |f|
       File.join( folder, f )      
     end
-    pp html_files
-    #pp parse_files html_files
-    #pp parse_files [ "tests\\classes\\AbstractView.html"]
-    #pp parse_files [ "tests\\classes\\AlertListener.html"]    
+	
+	$logger.info html_files
+	res = parse_files html_files
+	$logger.info res
+	res
   end
 
 	# accepts an arroy of file paths,

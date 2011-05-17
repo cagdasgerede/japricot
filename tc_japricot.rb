@@ -10,4 +10,4 @@ $logger.level = Logger::ERROR
 
 require './tests/test_parser_methods'
 require './tests/test_parser_classes'
-
+require './tests/test_folder_parser'

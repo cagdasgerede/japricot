@@ -100,12 +100,33 @@ class TestFolderParser < Test::Unit::TestCase
 		assert_equal(html[:origin], "tests/classes/HTML.html")
 		assert_equal(html[:name], "HTML")
 		assert_equal(html[:package], "javax.swing.text.html")
+		assert_equal(html[:methods].size, 6)
+
 		
 		abstract_view = res["org.w3c.dom.views.AbstractView"]
 		assert_equal(abstract_view[:type], :interface)
 		assert_equal(abstract_view[:origin], "tests/classes/AbstractView.html")
 		assert_equal(abstract_view[:name], "AbstractView")
 		assert_equal(abstract_view[:package], "org.w3c.dom.views")
+		assert_equal(abstract_view[:methods].size, 1)
+	end
+	
+	def test_parse_folder
+		res = FolderParser.parse_folder File.join('tests','folders','1', 'classes')
+		html = res["javax.swing.text.html.HTML"]
+		assert_equal(html[:type], :class)
+		assert_equal(html[:origin], "tests/folders/1/classes/HTML.html")
+		assert_equal(html[:name], "HTML")
+		assert_equal(html[:package], "javax.swing.text.html")
+		assert_equal(html[:methods].size, 6)
+
+		
+		abstract_view = res["org.w3c.dom.views.AbstractView"]
+		assert_equal(abstract_view[:type], :interface)
+		assert_equal(abstract_view[:origin], "tests/folders/1/classes/AbstractView.html")
+		assert_equal(abstract_view[:name], "AbstractView")
+		assert_equal(abstract_view[:package], "org.w3c.dom.views")
+		assert_equal(abstract_view[:methods].size, 1)
 	end
 end
 
