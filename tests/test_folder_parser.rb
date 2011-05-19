@@ -12,13 +12,16 @@ class TestFolderParser < Test::Unit::TestCase
 		end
 	end
 
-	# this test causes a log message of type FATAL. This is expected.
 	def test_parse_file_empty
 		assert_equal( {}, FolderParser.parse_file(File.join('tests', 'classes', 'UnrelatedFile.html')))
 	end
 	
 	def test_unmatching_class_name_vs_file_name
+		# this test would trigger a log message of type ERROR. We raise the level to FATAL temporarily to ignore this message.
+		original = $logger.level
+		$logger.level = Logger::FATAL
 		assert_raise Exception do FolderParser.parse_file(File.join('tests','classes','UnmatchingClass.html')) end
+		$logger.level = original
 	end
 
 	def _helper params
@@ -127,6 +130,49 @@ class TestFolderParser < Test::Unit::TestCase
 		assert_equal(abstract_view[:name], "AbstractView")
 		assert_equal(abstract_view[:package], "org.w3c.dom.views")
 		assert_equal(abstract_view[:methods].size, 1)
+		
+		assert_equal(res.size, 2)
+	end
+	
+	def test_extract_subfolders_recursively
+		res = FolderParser.extract_subfolders_recursively File.join( 'tests', 'extract_folders_recursively')
+		expected =%w(
+			tests/extract_folders_recursively/x1 
+			tests/extract_folders_recursively/x1/x1x1
+			tests/extract_folders_recursively/x1/x1x1/x1x1x1
+			tests/extract_folders_recursively/y1
+			tests/extract_folders_recursively/y1/y1y1
+			tests/extract_folders_recursively/y1/y1z1)
+
+		assert( res.sort == expected )
+	end
+	
+	def test_parse_recursively 
+		res = FolderParser.parse_recursively File.join('tests', 'recursive')
+		assert_equal(res.keys.size, 7)
+		
+		barcode ={
+		:type=>:class,
+		:methods=>[],
+		:origin=>"tests/recursive/net/rim/device/api/barcodelib/BarcodeDecoder.html",
+		:name=>"BarcodeDecoder",
+		:package=>"net.rim.device.api.barcodelib"}
+		
+		assert( barcode == res[ 'net.rim.device.api.barcodelib.BarcodeDecoder' ] )
+		
+		html ={
+		:type=>:class,
+		:methods=>[
+			{:type=>"static", :params=>[], :name=>"getAllTags", :returns=>"javax.swing.text.html.HTML.Tag[]"},
+			{:type=>"static", :params=>["java.lang.String"], :name=>"getTag", :returns=>"javax.swing.text.html.HTML.Tag"},
+			{:type=>"static", :params=>["javax.swing.text.AttributeSet", "javax.swing.text.html.HTML.Attribute", "int"], :name=>"getIntegerAttributeValue", :returns=>"int"},
+			{:type=>"static", :params=>[], :name=>"getAllAttributeKeys", :returns=>"javax.swing.text.html.HTML.Attribute[]"}, {:params=>["byte[]"], :name=>"setExtra", :returns=>"void"},
+			{:type=>"static", :params=>["java.lang.String"], :name=>"getAttributeKey", :returns=>"javax.swing.text.html.HTML.Attribute"}],
+		:origin=>"tests/recursive/javax/swing/text/html/HTML.html",
+		:name=>"HTML",
+		:package=>"javax.swing.text.html"}
+		
+		assert( html == res[ 'javax.swing.text.html.HTML' ] )
 	end
 end
 
