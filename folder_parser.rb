@@ -4,6 +4,7 @@ require './parser'
 
 
 class FolderParser
+	# see parse file
 	def self.parse_recursively root_folder
 		res = {}
 		res.merge!( parse_folder( root_folder ) )
