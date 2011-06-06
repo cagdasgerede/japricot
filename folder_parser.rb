@@ -2,9 +2,12 @@ require 'rubygems'
 require 'hpricot'
 require './parser'
 
-
+# Usage: 
+# See usage.rb to see the usage of this class.
 class FolderParser
-	# see parse file
+	# see parse_file
+	# (in short parses all the files under the given root folder,
+	# for the output see the parse_file method)
 	def self.parse_recursively root_folder
 		res = {}
 		res.merge!( parse_folder( root_folder ) )
@@ -16,6 +19,7 @@ class FolderParser
 		res
 	end
 	
+	# extract all subfolders of a root folder.
 	def self.extract_subfolders_recursively root_folder
 		res = []
 		current_subfolders = root_folder
@@ -31,6 +35,7 @@ class FolderParser
 		res
 	end
 	
+	# extract all subfolders of the given folder.
 	def self.extract_subfolders folder
 		entries = Dir.new( folder ).entries
 		subfolders = entries.select do |e|
@@ -45,6 +50,7 @@ class FolderParser
 		subfolders
 	end
 
+  # accepts a folder and parse all files under this folder.
 	def self.parse_folder folder #= File.join('tests', 'classes')
 		entries = Dir.new( folder ).entries
 		html_files = entries.select do |e|
