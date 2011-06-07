@@ -1,0 +1,181 @@
+--- 
+net.rim.device.api.barcodelib.BarcodeDecoder: 
+  :origin: tests/classes/BarcodeDecoder.html
+  :type: :class
+  :package: net.rim.device.api.barcodelib
+  :methods: []
+
+  :name: BarcodeDecoder
+javax.swing.text.html.HTML: 
+  :origin: tests/classes/HTML.html
+  :type: :class
+  :package: javax.swing.text.html
+  :methods: 
+  - :type: static
+    :returns: javax.swing.text.html.HTML.Tag[]
+    :name: getAllTags
+    :params: []
+
+  - :type: static
+    :returns: javax.swing.text.html.HTML.Tag
+    :name: getTag
+    :params: 
+    - java.lang.String
+  - :type: static
+    :returns: int
+    :name: getIntegerAttributeValue
+    :params: 
+    - javax.swing.text.AttributeSet
+    - javax.swing.text.html.HTML.Attribute
+    - int
+  - :type: static
+    :returns: javax.swing.text.html.HTML.Attribute[]
+    :name: getAllAttributeKeys
+    :params: []
+
+  - :returns: void
+    :name: setExtra
+    :params: 
+    - byte[]
+  - :type: static
+    :returns: javax.swing.text.html.HTML.Attribute
+    :name: getAttributeKey
+    :params: 
+    - java.lang.String
+  :name: HTML
+org.w3c.dom.views.AbstractView: 
+  :origin: tests/classes/AbstractView.html
+  :type: :interface
+  :package: org.w3c.dom.views
+  :methods: 
+  - :returns: org.w3c.dom.views.DocumentView
+    :name: getDocument
+    :params: []
+
+  :name: AbstractView
+com.google.zxing.qrcode.encoder.BitVector: 
+  :origin: tests/classes/BitVector.html
+  :type: :class
+  :package: com.google.zxing.qrcode.encoder
+  :methods: 
+  - :returns: int
+    :name: at
+    :params: 
+    - int
+  - :returns: int
+    :name: size
+    :params: []
+
+  - :returns: int
+    :name: sizeInBytes
+    :params: []
+
+  - :returns: void
+    :name: appendBit
+    :params: 
+    - int
+  - :returns: void
+    :name: appendBits
+    :params: 
+    - int
+    - int
+  - :returns: void
+    :name: appendBitVector
+    :params: 
+    - com.google.zxing.qrcode.encoder.BitVector
+  - :returns: void
+    :name: xor
+    :params: 
+    - com.google.zxing.qrcode.encoder.BitVector
+  - :returns: java.lang.String
+    :name: toString
+    :params: []
+
+  - :returns: byte[]
+    :name: getArray
+    :params: []
+
+  :name: BitVector
+java.util.zip.ZipFile: 
+  :origin: tests/classes/ZipFile.html
+  :type: :class
+  :package: java.util.zip
+  :methods: 
+  - :returns: java.util.zip.ZipEntry
+    :name: getEntry
+    :params: 
+    - java.lang.String
+  - :returns: java.io.InputStream
+    :name: getInputStream
+    :params: 
+    - java.util.zip.ZipEntry
+  - :returns: java.lang.String
+    :name: getName
+    :params: []
+
+  - :returns: java.util.Enumeration
+    :name: entries
+    :params: []
+
+  - :returns: int
+    :name: drainTo
+    :params: 
+    - java.util.Collection
+  - :returns: int
+    :name: size
+    :params: []
+
+  - :returns: void
+    :name: close
+    :params: []
+
+  - :returns: void
+    :name: finalize
+    :params: []
+
+  :name: ZipFile
+net.rim.device.api.system.AccelerometerSensor: 
+  :origin: tests/classes/AccelerometerSensor.html
+  :type: :class
+  :package: net.rim.device.api.system
+  :methods: 
+  - :type: static
+    :returns: boolean
+    :name: isSupported
+    :params: []
+
+  - :type: static
+    :returns: net.rim.device.api.system.AccelerometerSensor.Channel
+    :name: openOrientationDataChannel
+    :params: 
+    - net.rim.device.api.system.Application
+  - :type: static
+    :returns: net.rim.device.api.system.AccelerometerSensor.Channel
+    :name: openRawDataChannel
+    :params: 
+    - net.rim.device.api.system.Application
+  - :type: static
+    :returns: net.rim.device.api.system.AccelerometerSensor.Channel
+    :name: openChannel
+    :params: 
+    - net.rim.device.api.system.Application
+    - net.rim.device.api.system.AccelerometerChannelConfig
+  :name: AccelerometerSensor
+net.rim.device.api.system.AlertListener: 
+  :origin: tests/classes/AlertListener.html
+  :type: :interface
+  :package: net.rim.device.api.system
+  :methods: 
+  - :returns: void
+    :name: audioDone
+    :params: 
+    - int
+  - :returns: void
+    :name: buzzerDone
+    :params: 
+    - int
+  - :returns: void
+    :name: vibrateDone
+    :params: 
+    - int
+  :name: AlertListener
