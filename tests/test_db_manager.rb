@@ -2,20 +2,21 @@ require "test/unit"
 #require 'rubygems'
 #require 'hpricot'
 #require './folder_parser'
-require 'db_creater'
+require 'db_manager'
 
-class TestDBCreater < Test::Unit::TestCase
+class TestDBManager < Test::Unit::TestCase
 	def setup
 		if $logger.nil?
 			require 'logger'
 			$logger = Logger.new STDOUT
 			$logger.level = Logger::INFO 
 		end
-		DBCreater.clean
-		DBCreater.create
+		DBManager.set_db_file
+		DBManager.clean
+		DBManager.create
 	end
 
-	def _test_single_result
+	def test_single_result
 		pkg = 'javax.swing.text.html'
 		origin = 'test/classes/HTML.html'
 		klass = 'HTML'
@@ -48,7 +49,7 @@ class TestDBCreater < Test::Unit::TestCase
 			} 
 		}
 
-		DBCreater.insert hash
+		DBManager.insert hash
 		
 		zunit = Zunit.find(:first, :conditions => { 
 			:name=>klass, 
@@ -129,7 +130,7 @@ class TestDBCreater < Test::Unit::TestCase
 	def _test_against_yaml file_path
 		yaml = YAML.load_file file_path
 		$logger.debug yaml.to_yaml
-		DBCreater.insert yaml
+		DBManager.insert yaml
 	end
 end
 
