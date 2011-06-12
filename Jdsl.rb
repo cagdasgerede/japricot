@@ -152,6 +152,7 @@ class Array
 			e.print
 			}
 		#res
+		""
 	end
 end
 
@@ -243,6 +244,103 @@ def execute_return command
 	puts instance_eval(command)
 end
 
+def all_use_counts
+	cs = ''.allcandidates.sort
+	
+	cs.each_with_index { |c,i|
+		counts = c.use_counts
+		if counts.size == 0
+			puts "#{c.full_name} is used by no unit"
+		else
+			if counts.size > 1
+				puts "#{c.full_name} is used by these"
+			else
+				puts "#{c.full_name} is used by this"
+			end
+			puts c.use_counts.inspect
+		end
+		puts "---------------"
+	}
+	""
+end
+
+
+##############################################
+## JDSL USAGE EXAMPLES				##########
+##								##############
+##						######################
+##############################################
+
+#execute_return("\"\".allcandidates.print")
+##javax.swing.text.html.HTML
+##javax.swing.text.html.HTML.Tag[]
+##javax.swing.text.html.HTML.Tag
+##java.lang.String
+##Primitive.int
+##javax.swing.text.AttributeSet
+##javax.swing.text.html.HTML.Attribute
+##javax.swing.text.html.HTML.Attribute[]
+##Primitive.void
+##Primitive.byte[]
+##net.rim.device.api.barcodelib.BarcodeDecoder
+##org.w3c.dom.views.AbstractView
+##org.w3c.dom.views.DocumentView
+##java.util.zip.ZipFile
+##java.util.zip.ZipEntry
+##java.io.InputStream
+##java.util.Enumeration
+##java.util.Collection
+##com.google.zxing.qrcode.encoder.BitVector
+##net.rim.device.api.system.AccelerometerSensor
+##Primitive.boolean
+##net.rim.device.api.system.AccelerometerSensor.Channel
+##net.rim.device.api.system.Application
+##net.rim.device.api.system.AccelerometerChannelConfig
+##net.rim.device.api.system.AlertListener
+
+
+#execute('\'\'.allcandidates.sort.print')
+##''.allcandidates.sort.print => 
+##com.google.zxing.qrcode.encoder.BitVector
+##java.io.InputStream
+##java.lang.String
+##java.util.Collection
+##java.util.Enumeration
+##java.util.zip.ZipEntry
+##java.util.zip.ZipFile
+##javax.swing.text.AttributeSet
+##javax.swing.text.html.HTML
+##javax.swing.text.html.HTML.Attribute
+##javax.swing.text.html.HTML.Attribute[]
+##javax.swing.text.html.HTML.Tag
+##javax.swing.text.html.HTML.Tag[]
+##net.rim.device.api.barcodelib.BarcodeDecoder
+##net.rim.device.api.system.AccelerometerChannelConfig
+##net.rim.device.api.system.AccelerometerSensor
+##net.rim.device.api.system.AccelerometerSensor.Channel
+##net.rim.device.api.system.AlertListener
+##net.rim.device.api.system.Application
+##org.w3c.dom.views.AbstractView
+##org.w3c.dom.views.DocumentView
+##Primitive.boolean
+##Primitive.byte[]
+##Primitive.int
+##Primitive.void
+
+
+#execute_return("\"\".allcandidates[0].print")
+##"".allcandidates[0].print => 
+##javax.swing.text.html.HTML
+
+#execute_return("\"String\".allcandidates.inspect")
+##"String".allcandidates.inspect => 
+##[#<Zunit id: 4, name: "String", package: "java.lang", category: "unknown", origin: "unknown">]
+
+
+#execute("\"String\".allcandidates.print")
+##"String".allcandidates.print => 
+##java.lang.String
+
 #execute("\"String\".allcandidates.first.full_name.neighbors.print")
 ##"String".allcandidates.first.full_name.neighbors.print => 
 ##javax.swing.text.html.HTML
@@ -332,7 +430,67 @@ end
 ##'java.lang.String'.jclass.use_counts[0][0].inspect => 
 #"javax.swing.text.html.HTML"
 
-
-
+#execute_return( 'all_use_counts' )
+##all_use_counts => 
+##com.google.zxing.qrcode.encoder.BitVector is used by this
+##[["com.google.zxing.qrcode.encoder.BitVector", 2]]
+##---------------
+##java.io.InputStream is used by no unit
+##---------------
+##java.lang.String is used by these
+##[["javax.swing.text.html.HTML", 2], ["java.util.zip.ZipFile", 1]]
+##---------------
+##java.util.Collection is used by this
+##[["java.util.zip.ZipFile", 1]]
+##---------------
+##java.util.Enumeration is used by no unit
+##---------------
+##java.util.zip.ZipEntry is used by this
+##[["java.util.zip.ZipFile", 1]]
+##---------------
+##java.util.zip.ZipFile is used by no unit
+##---------------
+##javax.swing.text.AttributeSet is used by this
+##[["javax.swing.text.html.HTML", 1]]
+##---------------
+##javax.swing.text.html.HTML is used by no unit
+##---------------
+##javax.swing.text.html.HTML.Attribute is used by this
+##[["javax.swing.text.html.HTML", 1]]
+##---------------
+##javax.swing.text.html.HTML.Attribute[] is used by no unit
+##---------------
+##javax.swing.text.html.HTML.Tag is used by no unit
+##---------------
+##javax.swing.text.html.HTML.Tag[] is used by no unit
+##---------------
+##net.rim.device.api.barcodelib.BarcodeDecoder is used by no unit
+##---------------
+##net.rim.device.api.system.AccelerometerChannelConfig is used by this
+##[["net.rim.device.api.system.AccelerometerSensor", 1]]
+##---------------
+##net.rim.device.api.system.AccelerometerSensor is used by no unit
+##---------------
+##net.rim.device.api.system.AccelerometerSensor.Channel is used by no unit
+##---------------
+##net.rim.device.api.system.AlertListener is used by no unit
+##---------------
+##net.rim.device.api.system.Application is used by this
+##[["net.rim.device.api.system.AccelerometerSensor", 3]]
+##---------------
+##org.w3c.dom.views.AbstractView is used by no unit
+##---------------
+##org.w3c.dom.views.DocumentView is used by no unit
+##---------------
+##Primitive.boolean is used by no unit
+##---------------
+##Primitive.byte[] is used by this
+##[["javax.swing.text.html.HTML", 1]]
+##---------------
+##Primitive.int is used by these
+##[["com.google.zxing.qrcode.encoder.BitVector", 4], ["net.rim.device.api.system.AlertListener", 3], ["javax.swing.text.html.HTML", 1]]
+##---------------
+##Primitive.void is used by no unit
+##---------------
 
 

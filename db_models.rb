@@ -31,6 +31,7 @@ class Zunit < ActiveRecord::Base
 	
 	def print
 		puts full_name
+		""
 	end
 	
 	def full_name
@@ -125,6 +126,10 @@ class Zunit < ActiveRecord::Base
 	
 	def top_user
 		use_counts[0]
+	end
+	
+	def <=> unit
+		full_name.capitalize <=> unit.full_name.capitalize
 	end
 end
 
