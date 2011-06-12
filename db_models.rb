@@ -29,10 +29,41 @@ class Zunit < ActiveRecord::Base
 		res.uniq
 	end
 	
+	def print
+		full_name
+	end
+	
 	def full_name
 		"#{package}.#{name}"
 	end
 	
+	# either just class or package.class (e.g., String or java.lang.String)
+	def self.find_all_by_semifull_name semi_full_name
+		name, pkg = cut_name_from_package semi_full_name
+		
+		if pkg.empty? 
+			Zunit.find_all_by_name(name) 
+		else 
+			Zunit.find_all_by_name_and_package(name, pkg)
+		end
+	end
+	
+	def self.find_all_by_substring substring
+		name, pkg = cut_name_from_package substring
+		
+		res1 = Zunit.find(:all, :conditions => [ "name LIKE ?", "%#{name}%" ])
+		if pkg.empty? 
+			res2 = Zunit.find(:all, :conditions => [ "package LIKE ?", "%#{name}%" ])
+			res1 + res2
+		else
+			res2 = res1.find_all { |unit|
+				not (unit.package =~ /#{pkg}$/).nil?
+			}
+			res3 = Zunit.find(:all, :conditions => [ "package LIKE ?", "%#{pkg}.#{name}%"] )
+			res2 + res3
+		end
+	end
+		
 	def self.find_or_create params 
 		z = Zunit.find(:first, 
 			:conditions => {:package => params[:package], :name => params[:name]})
@@ -57,15 +88,37 @@ class Zmethod < ActiveRecord::Base
 	has_many :zparams
 	has_one :zreturn
 	belongs_to :owner, :class_name => 'Zunit', :foreign_key => 'zunit_id'
+	
+	def print
+		params = ""
+		zparams.each_with_index { |x, i| params += "#{x.print}#{', ' if i+1<zparams.size}" } 
+		"#{owner.print} #{ category if category == 'static' } :: #{zreturn.print}  #{name}( #{params} )"
+	end
+	
+	def void?
+		zreturn.nil?
+	end
+	
+	def param_count
+		zparams.size
+	end
 end 
 
 class Zreturn < ActiveRecord::Base
 	belongs_to :zunit
 	belongs_to :zmethod
+	
+	def print
+		"#{zunit.print}"
+	end
 end
 
 class Zparam < ActiveRecord::Base
 	belongs_to :zunit
 	belongs_to :owner, :class_name => 'Zmethod', :foreign_key => 'zmethod_id'
 	validates_uniqueness_of :order, :scope => 'zmethod_id'
+	
+	def print
+		"#{zunit.print}"
+	end
 end
