@@ -2,38 +2,10 @@ load 'db_manager.rb'
 
 class JDSL
 	
-	def self.run
-		# methods returning string
-		string = Zunit.find_by_name_and_package('String', 'java.lang')
-		puts string.returned_by_zmethods.count
-				
-		#methods accepting string as parameter
-		puts string.used_by_zmethods.count
-		
-		#classes/interfaces accepting string as parameter in their methods
-		puts string.used_by_zunits.size
-	end
-	
 	#find k distance classes to "java.lang.String"
 	def self.k_neighbors k, unit_name, pkg
 		unit = Zunit.find_by_name_and_package(unit_name, pkg)
-		unit_neighbors = unit.used_by_zunits
-		last_neighbors = unit_neighbors
-
-		(k-1).times { |i|
-			puts i
-			break if last_neighbors.empty?
-			new_neighbors = []
-			last_neighbors.each { |neighbor|
-				new_neighbors += neighbor.used_by_zunits
-			}
-			unit_neighbors += new_neighbors
-			last_neighbors = new_neighbors
-	
-			unit_neighbors.uniq!
-			last_neighbors.uniq!
-		}
-		unit_neighbors
+		unit.neighbors(k)
 	end
 	
 	#top_k returned class
@@ -64,23 +36,11 @@ class JDSL
 	#a unit is used by another if former is a parameter in a method of latter
 	def self.top_user_of unit_name, package
 		unit = Zunit.find_by_name_and_package( unit_name, package )
-		use_count = {}
-		unit.used_by_zunits.each { |user_unit|
-			use_count[user_unit.full_name] = 0
-		}
-
-		unit.used_by_zmethods.each { |user_method|
-			use_count[user_method.owner.full_name] += 1
-		}
-
-		result = use_count.to_a
-
-		result.sort! { |a,b|
-			b[1] <=> a[1]
-		}
-
-		result[0] #top
-		#puts result.to_yaml
+		unless unit.nil? 
+			unit.top_user
+		else
+			nil
+		end
 	end
 	
 	def self.top_users_of_all
@@ -130,10 +90,23 @@ class JDSL
 			DBManager.connect db_file
 		end
 	end
+	
+		#sample run
+	def self.sample_run
+		# methods returning string
+		string = Zunit.find_by_name_and_package('String', 'java.lang')
+		puts string.returned_by_zmethods.count
+				
+		#methods accepting string as parameter
+		puts string.used_by_zmethods.count
+		
+		#classes/interfaces accepting string as parameter in their methods
+		puts string.used_by_zunits.size
+	end
 end
 
 JDSL.test_setup
-#JDSL.run
+#JDSL.sample_run
 
 #x = JDSL.k_neighbors 2, 'String', 'java.lang'
 #puts x.to_yaml
@@ -160,6 +133,7 @@ JDSL.test_setup
 
 #never_used_and_returned = JDSL.never_used_and_returned_units
 #puts never_used_and_returned.size
+
 class Array
 	def collect_names
 		collect { |unit|
@@ -172,23 +146,24 @@ class Array
 	end
 	
 	def print
-		res = ""
+		#res = ""
 		each { |e|
-			res += "#{e.print}\n"
+			#res += "#{e.print}\n"
+			e.print
 			}
-		res
+		#res
 	end
 end
 
 def nil.print 
-	"empty result"
+	puts "empty result"
 end
 
 class String
 	#"HTML".jmethods(:returns=>"javax.swing.text.html.HTML.Tag")
 	# => getTag
 	def jmethods( conditions={} )
-		units = Zunit.find_all_by_semifull_name self
+		units = candidates()
 		if units.empty?
 			[]
 		else
@@ -222,26 +197,50 @@ class String
 	end
 	
 	def neighbors
-		unit = Zunit.find_all_by_semifull_name(self).first
+		unit = candidates().first
 		unless unit.nil?
-			( unit.used_by_zunits +
-			unit.returned_by_zunits ).uniq
+			unit.neighbors
 		else
 			[]
 		end
 	end
 	
 	def jmethod name
-		unit = Zunit.find_all_by_semifull_name(self).first
-		unit.zmethods.find_by_name(name)
+		unit = candidates().first
+		unless unit.nil?
+			unit.zmethods.find_by_name(name)
+		else
+			nil
+		end
+	end
+	
+	def jclass
+		candidates().first
+	end
+	
+	def print
+		puts inspect
+	end
+end
+
+class Fixnum
+	def print
+		puts inspect
 	end
 end
 
 def execute command
 	puts
 	puts "#{command} => "
-	puts instance_eval(command)
+	#puts 
+	instance_eval(command)
 	puts
+end
+
+def execute_return command
+	puts
+	puts "#{command} => "
+	puts instance_eval(command)
 end
 
 #execute("\"String\".allcandidates.first.full_name.neighbors.print")
@@ -282,15 +281,58 @@ end
 ##"HTML".jmethods(:name=>"getTag", :returns => \"HTML.Tag\").first.print => 
 ##javax.swing.text.html.HTML static :: javax.swing.text.html.HTML.Tag  getTag( java.lang.String )
 
-#execute( "\"HTML\".jmethods(:name=>\"getTag\").first.void?" )
+#execute_return( "\"HTML\".jmethods(:name=>\"getTag\").first.void?" )
 ##"HTML".jmethods(:name=>"getTag").first.void? => 
 ##false
 
-#execute( "\"HTML\".jmethods(:name=>\"getTag\").first.param_count")
+#execute_return( "\"HTML\".jmethods(:name=>\"getTag\").first.param_count")
 ##"HTML".jmethods(:name=>"getTag").first.param_count => 
 ##1
 
 #execute( "\"HTML\".jmethod(\"getTag\").print" )
 ## "HTML".jmethod("getTag").print => 
 ## javax.swing.text.html.HTML static :: javax.swing.text.html.HTML.Tag  getTag( java.lang.String )
+
+#execute_return( "\"HTML\".jclass.full_name" )
+##"HTML".jclass.full_name => 
+##javax.swing.text.html.HTML
+
+#execute( '\'java.lang.String\'.jclass.neighbors(0).print' )
+##'java.lang.String'.jclass.neighbors(0).print => 
+##javax.swing.text.html.HTML
+##java.util.zip.ZipFile
+##com.google.zxing.qrcode.encoder.BitVector
+
+#execute_return( '\'java.lang.String\'.jclass.top_user[0]' )
+##'java.lang.String'.jclass.top_user[0] => 
+##javax.swing.text.html.HTML
+
+#execute_return( '\'java.lang.String\'.jclass.top_user[1]' )
+##'java.lang.String'.jclass.top_user[1] => 
+##2
+
+## INSPECT VS. PRINT
+#execute_return( '\'java.lang.String\'.jclass.use_counts.inspect' )
+##'java.lang.String'.jclass.use_counts.display => 
+##[["javax.swing.text.html.HTML", 2], ["java.util.zip.ZipFile", 1]]
+
+#execute( '\'java.lang.String\'.jclass.use_counts.print' )
+##'java.lang.String'.jclass.use_counts.print => 
+##"javax.swing.text.html.HTML"
+##2
+##
+##"java.util.zip.ZipFile"
+##1
+
+#execute_return( '\'java.lang.String\'.jclass.use_counts[0].inspect' )
+##'java.lang.String'.jclass.use_counts[0].inspect => 
+##["javax.swing.text.html.HTML", 2]
+
+#execute_return( '\'java.lang.String\'.jclass.use_counts[0][0].inspect' )
+##'java.lang.String'.jclass.use_counts[0][0].inspect => 
+#"javax.swing.text.html.HTML"
+
+
+
+
 

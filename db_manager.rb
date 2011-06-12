@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'active_record'
-load 'db_models.rb'
+load 'db_models.rb'	
 
 # load 'db_manager.rb'; DBCreater.init YAML.load_file(File.join('tests','yaml','file.yaml'))
 class DBManager

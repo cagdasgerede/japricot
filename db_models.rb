@@ -30,7 +30,7 @@ class Zunit < ActiveRecord::Base
 	end
 	
 	def print
-		full_name
+		puts full_name
 	end
 	
 	def full_name
@@ -80,6 +80,52 @@ class Zunit < ActiveRecord::Base
 		pkg = tmp.join( '.' )
 		[name, pkg]
 	end
+	
+	def neighbors(k=0)
+		if k == 0
+			(used_by_zunits + returned_by_zunits).uniq
+		else
+			unit_neighbors = used_by_zunits
+			last_neighbors = unit_neighbors
+
+			(k-1).times { |i|
+				break if last_neighbors.empty?
+				new_neighbors = []
+				last_neighbors.each { |neighbor|
+					new_neighbors += neighbor.used_by_zunits
+				}
+				unit_neighbors += new_neighbors
+				last_neighbors = new_neighbors
+		
+				unit_neighbors.uniq!
+				last_neighbors.uniq!
+			}
+			unit_neighbors
+		end
+	end
+	
+	def use_counts
+		use_count = {}
+		used_by_zunits.each { |user_unit|
+			use_count[user_unit.full_name] = 0
+		}
+
+		used_by_zmethods.each { |user_method|
+			use_count[user_method.owner.full_name] += 1
+		}
+
+		result = use_count.to_a
+
+		result.sort! { |a,b|
+			b[1] <=> a[1]
+		}
+
+		result
+	end
+	
+	def top_user
+		use_counts[0]
+	end
 end
 
 class Zmethod < ActiveRecord::Base
@@ -91,8 +137,8 @@ class Zmethod < ActiveRecord::Base
 	
 	def print
 		params = ""
-		zparams.each_with_index { |x, i| params += "#{x.print}#{', ' if i+1<zparams.size}" } 
-		"#{owner.print} #{ category if category == 'static' } :: #{zreturn.print}  #{name}( #{params} )"
+		zparams.each_with_index { |param, i| params += "#{param.zunit.full_name}#{', ' if i+1 < zparams.size}" } 
+		puts "#{owner.full_name} #{ category if category == 'static' } :: #{zreturn.zunit.full_name}  #{name}( #{params} )"
 	end
 	
 	def void?
@@ -107,18 +153,10 @@ end
 class Zreturn < ActiveRecord::Base
 	belongs_to :zunit
 	belongs_to :zmethod
-	
-	def print
-		"#{zunit.print}"
-	end
 end
 
 class Zparam < ActiveRecord::Base
 	belongs_to :zunit
 	belongs_to :owner, :class_name => 'Zmethod', :foreign_key => 'zmethod_id'
 	validates_uniqueness_of :order, :scope => 'zmethod_id'
-	
-	def print
-		"#{zunit.print}"
-	end
 end
