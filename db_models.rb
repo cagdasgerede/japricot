@@ -95,7 +95,7 @@ class Zunit < ActiveRecord::Base
 			user_count[user_method.owner.full_name] += 1
 		}
 
-		_prepare_hash_for_output user_count, k
+		Zunit._prepare_hash_for_output user_count, k
 	end
 	
 	#Unit consuming (having methods with parameter of) "me" the most
@@ -114,7 +114,7 @@ class Zunit < ActiveRecord::Base
 			returner_count[returner_method.owner.full_name] += 1
 		}
 		
-		_prepare_hash_for_output returner_count, k
+		Zunit._prepare_hash_for_output returner_count, k
 	end
 	
 	#Unit producing (having methods returning) "me" the most
@@ -136,7 +136,7 @@ class Zunit < ActiveRecord::Base
 			end
 		}
 		
-		_prepare_hash_for_output result, k
+		Zunit._prepare_hash_for_output result, k
 	end
 	
 	# Unit that consume and produce "me" (as method params and returns)
@@ -148,15 +148,15 @@ class Zunit < ActiveRecord::Base
 	# referrers(0) : all units referring to "me"
 	# referrers(1) : all units referring to referrers(0) UNION referrers(0)
 	def referrers(k=0)
-		immediate_referrers = (used_by_zunits + returned_by_zunits).uniq
+		immediate_referrers = used_by_zunits + returned_by_zunits
+		immediate_referrers.uniq!
 		if k == 0
 			immediate_referrers.sort
 		else
 			unit_referrers = immediate_referrers 
 			last_referrers = unit_referrers
-
+			prev_unit_referrers_size = unit_referrers.size
 			k.times { |i|
-				break if last_referrers.empty?
 				new_referrers = []
 				last_referrers.each { |r|
 					new_referrers += r.used_by_zunits
@@ -167,6 +167,12 @@ class Zunit < ActiveRecord::Base
 		
 				unit_referrers.uniq!
 				last_referrers.uniq!
+				
+				if prev_unit_referrers_size < unit_referrers.size
+					prev_unit_referrers_size = unit_referrers.size
+				else
+					break
+				end
 			}
 			unit_referrers.sort
 		end
@@ -190,7 +196,7 @@ class Zunit < ActiveRecord::Base
 			end
 		}
 		
-		_prepare_hash_for_output counts, k
+		Zunit._prepare_hash_for_output counts, k
 	end
 	
 	#see top_producer
@@ -205,7 +211,7 @@ class Zunit < ActiveRecord::Base
 			end
 		}
 		
-		_prepare_hash_for_output counts, k 
+		Zunit._prepare_hash_for_output counts, k 
 	end
 	
 	#unit that "I" consume the most (most number of methods using that unit)
@@ -219,37 +225,69 @@ class Zunit < ActiveRecord::Base
 	end
 	
 	#units that "I" need, and (recursively) all units that are needed by those units.
+	#Does not use primitives to compute transitive needs.
 	def needed k=0
 		res = []
 		Zunit._helper_for_needed_method self, res
 		
-		immediate_needed = res.uniq
+		immediate_needed = Zunit._eliminate_primitives( res.uniq )
 		if k == 0
 			immediate_needed.sort
 		else
 			unit_needed = immediate_needed 
 			last_needed = unit_needed
-
+			prev_size_of_unit_needed = unit_needed.size
 			k.times { |i|
-				break if last_needed.empty?
 				new_needed = []
 				last_needed.each { |n|
 					Zunit._helper_for_needed_method n, new_needed 
 				}
+				new_needed = Zunit._eliminate_primitives( new_needed )
 				unit_needed += new_needed
 				last_needed = new_needed
-		
+								
 				unit_needed.uniq!
 				last_needed.uniq!
+				
+				if prev_size_of_unit_needed < unit_needed.size
+					prev_size_of_unit_needed = unit_needed.size
+				else
+					break
+				end
 			}
 			unit_needed.sort
 		end
 	end
 	
+	def needed_primitives
+		res = []
+		Zunit._helper_for_needed_method( self, res )
+		res = res.select { |unit|
+			unit.package == 'Primitive'
+		}
+		res.uniq!.sort
+	end
+	
 	#units that refer to "me" and units that "I" need, and (recursively) all units that
 	#refer or need these units (bounded by k).
 	def neighbors k=0
-		( referrers(k) + needed(k) ).uniq.sort
+		tmp = (referrers + needed).uniq
+		prev_size = tmp.size
+		k.times {
+			new_ = []
+			tmp.each { |u|
+				new_ += ( u.referrers + u.needed )
+			}
+			tmp += new_
+			tmp.uniq!
+			if prev_size < tmp.size
+				prev_size = tmp.size
+			else
+				break
+			end
+		}
+		tmp.sort
+		#( referrers(k) + needed(k) ).uniq.sort
 	end
 	
 	#all needed units (do not stop until closure is reached)
@@ -283,7 +321,7 @@ class Zunit < ActiveRecord::Base
 		}
 	end
 
-	def _prepare_hash_for_output hash, k
+	def self._prepare_hash_for_output hash, k
 		result = hash.to_a
 
 		result.sort! { |a,b|
@@ -295,6 +333,12 @@ class Zunit < ActiveRecord::Base
 		else
 			result
 		end
+	end
+	
+	def self._eliminate_primitives arr
+		arr.select { |unit|
+			unit.package != 'Primitive'
+		}
 	end
 end
 

@@ -118,7 +118,9 @@ class FolderParser
 				raise Exception.new( msg ) unless $IGNORE_ERROR
 				return {}
 			end
+			
 			methods = Parser.parse_class( Parser.prepare( path ) )
+	
 			return { pkg_and_name => {:name => name, :package => pkg, :type => type, 
 				:origin => path, :methods => methods } }
 		else

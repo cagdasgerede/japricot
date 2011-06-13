@@ -63,9 +63,14 @@ class Parser
 	def self.parse_class doc
 		methods = []
 		anchor = doc.at('//a[@name=method_detail]')
+				
 		unless anchor.nil?
+			if anchor.following_siblings.empty?
+				# If we could not find any method, let's try the following. It worked with java.util.Checksum
+				anchor = doc.at('//a[@name=method_detail]/..')
+			end
 			anchor.following_siblings.each { |e| 
-				if e.name='a' and 
+				if e.name=='a' and 
 					not e['name'].nil? and 
 					e['name']!='navbar_bottom' and 
 					e['name']!='skip-navbar_bottom'		
@@ -75,7 +80,6 @@ class Parser
 					methods.push method
 				end
 			}
-		#else (no method exists)
 		end
 		methods
 	end
