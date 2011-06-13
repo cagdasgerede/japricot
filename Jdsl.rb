@@ -3,9 +3,9 @@ load 'db_manager.rb'
 class JDSL
 	
 	#find k distance classes to "java.lang.String"
-	def self.k_neighbors k, unit_name, pkg
+	def self.k_referrers k, unit_name, pkg
 		unit = Zunit.find_by_name_and_package(unit_name, pkg)
-		unit.neighbors(k)
+		unit.referrers(k)
 	end
 	
 	#top_k returned class
@@ -91,7 +91,18 @@ class JDSL
 		end
 	end
 	
-		#sample run
+	def self.setup db_file, source_yaml
+		unless File.exists? db_file
+			DBManager.init( 
+				YAML.load_file( source_yaml ),
+				db_file
+			)
+		else
+			DBManager.connect db_file
+		end
+	end
+	
+	#sample run
 	def self.sample_run
 		# methods returning string
 		string = Zunit.find_by_name_and_package('String', 'java.lang')
@@ -105,10 +116,10 @@ class JDSL
 	end
 end
 
-JDSL.test_setup
+#JDSL.test_setup
 #JDSL.sample_run
 
-#x = JDSL.k_neighbors 2, 'String', 'java.lang'
+#x = JDSL.k_referrers 2, 'String', 'java.lang'
 #puts x.to_yaml
 
 
@@ -197,10 +208,10 @@ class String
 		Zunit.find_all_by_substring( self ).uniq
 	end
 	
-	def neighbors
+	def referrers
 		unit = candidates().first
 		unless unit.nil?
-			unit.neighbors
+			unit.referrers
 		else
 			[]
 		end
@@ -244,11 +255,11 @@ def execute_return command
 	puts instance_eval(command)
 end
 
-def all_use_counts
+def all_user_counts
 	cs = ''.allcandidates.sort
 	
 	cs.each_with_index { |c,i|
-		counts = c.use_counts
+		counts = c.user_counts
 		if counts.size == 0
 			puts "#{c.full_name} is used by no unit"
 		else
@@ -257,7 +268,7 @@ def all_use_counts
 			else
 				puts "#{c.full_name} is used by this"
 			end
-			puts c.use_counts.inspect
+			puts c.user_counts.inspect
 		end
 		puts "---------------"
 	}
@@ -341,14 +352,14 @@ end
 ##"String".allcandidates.print => 
 ##java.lang.String
 
-#execute("\"String\".allcandidates.first.full_name.neighbors.print")
-##"String".allcandidates.first.full_name.neighbors.print => 
+#execute("\"String\".allcandidates.first.full_name.referrers.print")
+##"String".allcandidates.first.full_name.referrers.print => 
 ##javax.swing.text.html.HTML
 ##java.util.zip.ZipFile
 ##com.google.zxing.qrcode.encoder.BitVector
 
-#execute("\"String\".neighbors.print")
-##"String".neighbors.print => 
+#execute("\"String\".referrers.print")
+##"String".referrers.print => 
 ##javax.swing.text.html.HTML
 ##java.util.zip.ZipFile
 ##com.google.zxing.qrcode.encoder.BitVector
@@ -395,8 +406,8 @@ end
 ##"HTML".jclass.full_name => 
 ##javax.swing.text.html.HTML
 
-#execute( '\'java.lang.String\'.jclass.neighbors(0).print' )
-##'java.lang.String'.jclass.neighbors(0).print => 
+#execute( '\'java.lang.String\'.jclass.referrers(0).print' )
+##'java.lang.String'.jclass.referrers(0).print => 
 ##javax.swing.text.html.HTML
 ##java.util.zip.ZipFile
 ##com.google.zxing.qrcode.encoder.BitVector
@@ -410,28 +421,28 @@ end
 ##2
 
 ## INSPECT VS. PRINT
-#execute_return( '\'java.lang.String\'.jclass.use_counts.inspect' )
-##'java.lang.String'.jclass.use_counts.display => 
+#execute_return( '\'java.lang.String\'.jclass.user_counts.inspect' )
+##'java.lang.String'.jclass.user_counts.print => 
 ##[["javax.swing.text.html.HTML", 2], ["java.util.zip.ZipFile", 1]]
 
-#execute( '\'java.lang.String\'.jclass.use_counts.print' )
-##'java.lang.String'.jclass.use_counts.print => 
+#execute( '\'java.lang.String\'.jclass.user_counts.print' )
+##'java.lang.String'.jclass.user_counts.print => 
 ##"javax.swing.text.html.HTML"
 ##2
 ##
 ##"java.util.zip.ZipFile"
 ##1
 
-#execute_return( '\'java.lang.String\'.jclass.use_counts[0].inspect' )
-##'java.lang.String'.jclass.use_counts[0].inspect => 
+#execute_return( '\'java.lang.String\'.jclass.user_counts[0].inspect' )
+##'java.lang.String'.jclass.user_counts[0].inspect => 
 ##["javax.swing.text.html.HTML", 2]
 
-#execute_return( '\'java.lang.String\'.jclass.use_counts[0][0].inspect' )
-##'java.lang.String'.jclass.use_counts[0][0].inspect => 
+#execute_return( '\'java.lang.String\'.jclass.user_counts[0][0].inspect' )
+##'java.lang.String'.jclass.user_counts[0][0].inspect => 
 #"javax.swing.text.html.HTML"
 
-#execute_return( 'all_use_counts' )
-##all_use_counts => 
+#execute_return( 'all_user_counts' )
+##all_user_counts => 
 ##com.google.zxing.qrcode.encoder.BitVector is used by this
 ##[["com.google.zxing.qrcode.encoder.BitVector", 2]]
 ##---------------

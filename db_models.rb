@@ -68,8 +68,10 @@ class Zunit < ActiveRecord::Base
 	def self.find_or_create params 
 		z = Zunit.find(:first, 
 			:conditions => {:package => params[:package], :name => params[:name]})
-		if z.nil? or (z.category == 'unknown' and params[:category] != 'unknown')
-			return Zunit.create!(params)
+		if z.nil?
+			Zunit.create!(params)
+		elsif (z.category == 'unknown' and params[:category] != 'unknown')
+			Zunit.update(z, params)
 		else
 			return z
 		end
@@ -82,54 +84,217 @@ class Zunit < ActiveRecord::Base
 		[name, pkg]
 	end
 	
-	def neighbors(k=0)
-		if k == 0
-			(used_by_zunits + returned_by_zunits).uniq
-		else
-			unit_neighbors = used_by_zunits
-			last_neighbors = unit_neighbors
-
-			(k-1).times { |i|
-				break if last_neighbors.empty?
-				new_neighbors = []
-				last_neighbors.each { |neighbor|
-					new_neighbors += neighbor.used_by_zunits
-				}
-				unit_neighbors += new_neighbors
-				last_neighbors = new_neighbors
-		
-				unit_neighbors.uniq!
-				last_neighbors.uniq!
-			}
-			unit_neighbors
-		end
-	end
-	
-	def use_counts
-		use_count = {}
+	#see top_user
+	def user_counts k=nil
+		user_count = {}
 		used_by_zunits.each { |user_unit|
-			use_count[user_unit.full_name] = 0
+			user_count[user_unit.full_name] = 0
 		}
 
 		used_by_zmethods.each { |user_method|
-			use_count[user_method.owner.full_name] += 1
+			user_count[user_method.owner.full_name] += 1
 		}
 
-		result = use_count.to_a
-
-		result.sort! { |a,b|
-			b[1] <=> a[1]
-		}
-
-		result
+		_prepare_hash_for_output user_count, k
 	end
 	
+	#Unit consuming (having methods with parameter of) "me" the most
 	def top_user
-		use_counts[0]
+		user_counts[0]
+	end
+	
+	#see top_returner
+	def returner_counts k=nil
+		returner_count= {}
+		returned_by_zunits.each { |returner_unit|
+			returner_count[returner_unit.full_name] = 0
+		}
+
+		returned_by_zmethods.each { |returner_method|
+			returner_count[returner_method.owner.full_name] += 1
+		}
+		
+		_prepare_hash_for_output returner_count, k
+	end
+	
+	#Unit producing (having methods returning) "me" the most
+	def top_returner
+		returner_counts[0]
+	end
+	
+	#see top_referrer
+	def referrer_counts k=nil
+		result = {}
+		user_counts.each { |c|
+			result[c[0]] = c[1]
+		}
+		returner_counts.each { |c|
+			unless result[c[0]].nil?
+				result[c[0]] += c[1]
+			else
+				result[c[0]] = c[1]
+			end
+		}
+		
+		_prepare_hash_for_output result, k
+	end
+	
+	# Unit that consume and produce "me" (as method params and returns)
+	def top_referrer
+		referrer_counts[0]
+	end
+	
+	# user_counts + returned_counts => referrer_counts
+	# referrers(0) : all units referring to "me"
+	# referrers(1) : all units referring to referrers(0) UNION referrers(0)
+	def referrers(k=0)
+		immediate_referrers = (used_by_zunits + returned_by_zunits).uniq
+		if k == 0
+			immediate_referrers.sort
+		else
+			unit_referrers = immediate_referrers 
+			last_referrers = unit_referrers
+
+			k.times { |i|
+				break if last_referrers.empty?
+				new_referrers = []
+				last_referrers.each { |r|
+					new_referrers += r.used_by_zunits
+					new_referrers += r.returned_by_zunits
+				}
+				unit_referrers += new_referrers
+				last_referrers = new_referrers
+		
+				unit_referrers.uniq!
+				last_referrers.uniq!
+			}
+			unit_referrers.sort
+		end
+	end
+	
+	# see top_consumer
+	def consuming_counts k=nil
+		counts = {}
+		zmethods.each { |m|
+			res = m.zparams.collect { |p|
+				p.zunit.full_name
+			}
+			unless res.nil?
+				res.each { |name|
+					if counts[name].nil?
+						counts[name] = 1 
+					else
+						counts[name] += 1
+					end
+				}
+			end
+		}
+		
+		_prepare_hash_for_output counts, k
+	end
+	
+	#see top_producer
+	def producing_counts k=nil
+		counts = {}
+		zmethods.each { |m|
+			name = m.zreturn.zunit.full_name
+			if counts[name].nil?
+				counts[name] = 1 
+			else
+				counts[name] += 1
+			end
+		}
+		
+		_prepare_hash_for_output counts, k 
+	end
+	
+	#unit that "I" consume the most (most number of methods using that unit)
+	def top_consuming
+		consuming_counts[0]
+	end
+	
+	#unit that "I" produce the most (most number of methods returning that unit)
+	def top_producing
+		producing_counts[0]
+	end
+	
+	#units that "I" need, and (recursively) all units that are needed by those units.
+	def needed k=0
+		res = []
+		Zunit._helper_for_needed_method self, res
+		
+		immediate_needed = res.uniq
+		if k == 0
+			immediate_needed.sort
+		else
+			unit_needed = immediate_needed 
+			last_needed = unit_needed
+
+			k.times { |i|
+				break if last_needed.empty?
+				new_needed = []
+				last_needed.each { |n|
+					Zunit._helper_for_needed_method n, new_needed 
+				}
+				unit_needed += new_needed
+				last_needed = new_needed
+		
+				unit_needed.uniq!
+				last_needed.uniq!
+			}
+			unit_needed.sort
+		end
+	end
+	
+	#units that refer to "me" and units that "I" need, and (recursively) all units that
+	#refer or need these units (bounded by k).
+	def neighbors k=0
+		( referrers(k) + needed(k) ).uniq.sort
+	end
+	
+	#all needed units (do not stop until closure is reached)
+	def needed_closure
+		needed( 9999999 ) #ok..this is a temporary hack.
+	end
+	
+	#all referred units (do not stop until closure is reached)
+	def referrers_closure
+		referrers( 9999999 ) #ok..this is a temporary hack.
+	end
+	
+	#all neigbor units (do not stop until closure is reached)
+	def neighbors_closure
+		neighbors( 9999999 ) #ok..this is a temporary hack.
 	end
 	
 	def <=> unit
 		full_name.capitalize <=> unit.full_name.capitalize
+	end
+	
+	private
+	def self._helper_for_needed_method unit, res
+		unit.zmethods.each { |m|
+			m.zparams.each { |p|
+				res << p.zunit
+			}
+		}
+		unit.zmethods.each { |m|
+			res << m.zreturn.zunit
+		}
+	end
+
+	def _prepare_hash_for_output hash, k
+		result = hash.to_a
+
+		result.sort! { |a,b|
+			b[1] <=> a[1]
+		}
+		
+		unless k.nil?
+			result[0...k]
+		else
+			result
+		end
 	end
 end
 
@@ -152,6 +317,10 @@ class Zmethod < ActiveRecord::Base
 	
 	def param_count
 		zparams.size
+	end
+	
+	def <=> zmethod
+		name <=> zmethod.name
 	end
 end 
 

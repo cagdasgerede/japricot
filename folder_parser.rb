@@ -14,7 +14,7 @@ class FolderParser
 
 		subfolders = extract_subfolders_recursively( root_folder )
 		subfolders.each { |f|
-			res.merge! parse_folder( f )
+			res.merge! parse_folder( f ) if f != 'class_use'
 		}	
 		res
 	end
@@ -93,6 +93,7 @@ class FolderParser
 	def self.parse_file path#= File.join('tests','classes','HTML.html')
 		expected_name = path.split( File::SEPARATOR ).last.split('.').first
 		doc = Parser.prepare path
+		
 		res = doc.search("//meta[@content *= ' class']")#<meta name="keywords" content="javax.swing.text.html.HTML class">
 		if res.first.nil?
 			res = doc.search("//meta[@content *= ' interface']")
